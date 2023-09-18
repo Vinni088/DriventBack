@@ -1,24 +1,52 @@
 import { Address, Enrollment } from '@prisma/client';
 import { request } from '@/utils/request';
-import { notFoundError } from '@/errors';
+import { notFoundError, invalidCepError } from '@/errors';
 import { addressRepository, CreateAddressParams, enrollmentRepository, CreateEnrollmentParams } from '@/repositories';
 import { exclude } from '@/utils/prisma-utils';
+import { AxiosResponse } from 'axios';
+import { CepCompleto, CepFatorado } from '@/protocols';
 
-// TODO - Receber o CEP por parâmetro nesta função.
-async function getAddressFromCEP() {
-  // FIXME: está com CEP fixo!
-  const result = await request.get(`${process.env.VIA_CEP_API}/37440000/json/`);
+function tratamentoCep(cep: number | string) {
+  let novoCep = String(cep);
+  while (novoCep.length < 8) {
+    novoCep = "0" + novoCep
+  }
+  return novoCep;
+}
 
-  // TODO: Tratar regras de negócio e lanças eventuais erros
+async function getAddressFromCEP(cep: number) {
 
-  // FIXME: não estamos interessados em todos os campos
-  return result.data;
+  //Check para formato do cep recebido sem uso de requisição
+  if (String(cep).length > 8 || isNaN(cep)) {
+    throw invalidCepError();
+  }
+
+  let formatedCep = tratamentoCep(cep)
+
+  const requestResult = await request.get(`${process.env.VIA_CEP_API}/${formatedCep}/json/`) as AxiosResponse;
+  let result: CepCompleto = requestResult.data;
+
+  //Check para existencia do cep recebido no banco da API
+  if (result.erro === true || result.erro === "true") {
+    throw invalidCepError();
+  }
+
+  //Uma vez que o cep existe, formatação e envio dos campos desejados
+  let factoredResult: CepFatorado = {
+    logradouro: result.logradouro,
+    complemento: result.complemento,
+    bairro: result.bairro,
+    cidade: result.localidade,
+    uf: result.uf
+  }
+
+  return factoredResult;
 }
 
 async function getOneWithAddressByUserId(userId: number): Promise<GetOneWithAddressByUserIdResult> {
   const enrollmentWithAddress = await enrollmentRepository.findWithAddressByUserId(userId);
 
-  if (!enrollmentWithAddress) throw notFoundError();
+  if (!enrollmentWithAddress) throw { name: "InvalidDataError", message:"Inscrição não possui o endereço!"};
 
   const [firstAddress] = enrollmentWithAddress.Address;
   const address = getFirstAddress(firstAddress);
@@ -44,7 +72,11 @@ async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollm
   enrollment.birthday = new Date(enrollment.birthday);
   const address = getAddressForUpsert(params.address);
 
-  // TODO - Verificar se o CEP é válido antes de associar ao enrollment.
+  //Checks do cep:
+
+  const requestResult = await request.get(`${process.env.VIA_CEP_API}/${address.cep}/json/`) as AxiosResponse;
+  let result: CepCompleto = requestResult.data;
+  if (result.erro === true || result.erro === "true") { throw invalidCepError() }
 
   const newEnrollment = await enrollmentRepository.upsert(params.userId, enrollment, exclude(enrollment, 'userId'));
 
