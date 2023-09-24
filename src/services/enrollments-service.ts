@@ -27,14 +27,6 @@ async function getAddressFromCEP(cep: string): Promise<AddressEnrollment> {
   return address;
 }
 
-/*function tratamentoCep(cep: number | string) {
-  let novoCep = String(cep);
-  while (novoCep.length < 8) {
-    novoCep = "0" + novoCep
-  }
-  return novoCep;
-}*/
-
 async function getOneWithAddressByUserId(userId: number): Promise<GetOneWithAddressByUserIdResult> {
   const enrollmentWithAddress = await enrollmentRepository.findWithAddressByUserId(userId);
 
@@ -49,14 +41,11 @@ async function getOneWithAddressByUserId(userId: number): Promise<GetOneWithAddr
   };
 }
 
-
-
 function getFirstAddress(firstAddress: Address): GetAddressResult {
   if (!firstAddress) return null;
 
   return exclude(firstAddress, 'createdAt', 'updatedAt', 'enrollmentId');
 }
-
 
 async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollmentWithAddress) {
   const enrollment = exclude(params, 'address');

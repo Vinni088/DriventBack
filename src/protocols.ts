@@ -49,3 +49,37 @@ export type CEP = {
   cep: string;
 };
 
+export type userTickets = {
+  id: number,
+  status: string,
+  ticketTypeId: number,
+  enrollmentId: number,
+  TicketType: {
+    id: number,
+    name: string,
+    price: number,
+    isRemote: boolean,
+    includesHotel: boolean,
+    createdAt: Date,
+    updatedAt: Date,
+  }[],
+  createdAt: Date,
+  updatedAt: Date,
+}
+
+export type userTicketsUnformated = {
+  id: number,
+  status: string,
+  ticketTypeId: number,
+  enrollmentId: number,
+  Id_TicketType: number
+  name_TicketType: string,
+  price_TicketType: string,
+  isRemote_TicketType: boolean,
+  includesHotel_TicketType: boolean,
+  createdAt_TicketType: Date,
+  updatedAt_TicketType: Date,
+  createdAt: Date,
+  updatedAt: Date
+}
+
