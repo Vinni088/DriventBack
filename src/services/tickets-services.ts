@@ -14,7 +14,7 @@ async function getAllTicketTypes() {
 function correctData(data: string){
     let D = new Date(data)
 
-    D.setTime( D.getTime() - 3*(60)*(60)*1000)
+    D.setTime( D.getTime() - 0*3*(60)*(60)*1000)
 
     return D.toISOString()
 }

@@ -83,3 +83,13 @@ export type userTicketsUnformated = {
   updatedAt: Date
 }
 
+export type PostPaymentInfo = {
+  ticketId: number,
+  cardData: {
+    issuer: string,
+    number: number,
+    name: string,
+    expirationDate: Date | string,
+    cvv: number
+  }
+}

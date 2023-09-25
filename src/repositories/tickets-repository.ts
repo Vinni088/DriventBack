@@ -46,6 +46,16 @@ async function checkEnrollment(userId: number) {
     return resposta
 }
 
+async function checkEnrollmentById(id: number) {
+    let resposta = await prisma.enrollment.findFirst({
+        where: {
+            id
+        }
+    })
+
+    return resposta
+}
+
 async function createTicket(ticketTypeId: number, enrollmentId: number) {
     let d = new Date()
 
@@ -61,9 +71,20 @@ async function createTicket(ticketTypeId: number, enrollmentId: number) {
     return resposta
 }
 
+async function readTickets(id: number) {
+    let resposta = await prisma.ticket.findFirst({
+        where: {
+            id
+        }
+    })
+    return resposta
+}
+
 export const ticketRepository = {
+    readTickets,
     createTicket,
     readTicketTypes,
     checkEnrollment,
-    readTicketsFromUser
+    readTicketsFromUser,
+    checkEnrollmentById
 };
