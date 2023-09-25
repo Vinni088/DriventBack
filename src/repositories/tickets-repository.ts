@@ -46,15 +46,23 @@ async function checkEnrollment(userId: number) {
     return resposta
 }
 
-async function createTicket(userId: number) {
-    /*let resposta = prisma.ticket.create({
-        
+async function createTicket(ticketTypeId: number, enrollmentId: number) {
+    let d = new Date()
+
+    let resposta = prisma.ticket.create({
+        data: {
+            status: 'RESERVED',
+            enrollmentId,
+            ticketTypeId,
+            createdAt: d,
+        }
     })
 
-    return resposta*/
+    return resposta
 }
 
 export const ticketRepository = {
+    createTicket,
     readTicketTypes,
     checkEnrollment,
     readTicketsFromUser

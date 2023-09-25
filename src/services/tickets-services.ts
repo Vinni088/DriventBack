@@ -1,6 +1,6 @@
 import { notFoundError } from '@/errors';
 import { userTickets, userTicketsUnformated } from '@/protocols';
-import { TicketType } from '@prisma/client';
+import { Enrollment, TicketType } from '@prisma/client';
 import { ticketRepository } from '@/repositories';
 import { string } from 'joi';
 
@@ -18,9 +18,29 @@ function correctData(data: string){
 
     return D.toISOString()
 }
+function formatTicket( lst: userTickets[] ){
+    let respostaFormatted = {
+        id: lst[0].id,
+        status: lst[0].status, 
+        ticketTypeId: lst[0].ticketTypeId,
+        enrollmentId: lst[0].enrollmentId,
+        TicketType: {
+          id: lst[0].TicketType[0].id,
+          name: lst[0].TicketType[0].name,
+          price: lst[0].TicketType[0].price,
+          isRemote: lst[0].TicketType[0].isRemote,
+          includesHotel: lst[0].TicketType[0].includesHotel,
+          createdAt: correctData(new Date(lst[0].TicketType[0].createdAt).toISOString()),
+          updatedAt: correctData(new Date(lst[0].TicketType[0].updatedAt).toISOString())
+        },
+        createdAt: new Date(lst[0].createdAt).toISOString(),
+        updatedAt: new Date(lst[0].updatedAt).toISOString()
+      }
 
+    return respostaFormatted
+}
 async function getTicketsFromUser(userId: number) {
-    let checkForEnrollment = await ticketRepository.checkEnrollment(userId)
+    let checkForEnrollment: Enrollment = await ticketRepository.checkEnrollment(userId)
     if (!checkForEnrollment) {
         throw notFoundError();
     }
@@ -30,36 +50,20 @@ async function getTicketsFromUser(userId: number) {
         throw notFoundError();
     }
     
-    let respostaFormatted = {
-        id: respostaUnformatted[0].id,
-        status: respostaUnformatted[0].status, 
-        ticketTypeId: respostaUnformatted[0].ticketTypeId,
-        enrollmentId: respostaUnformatted[0].enrollmentId,
-        TicketType: {
-          id: respostaUnformatted[0].TicketType[0].id,
-          name: respostaUnformatted[0].TicketType[0].name,
-          price: respostaUnformatted[0].TicketType[0].price,
-          isRemote: respostaUnformatted[0].TicketType[0].isRemote,
-          includesHotel: respostaUnformatted[0].TicketType[0].includesHotel,
-          createdAt: correctData(new Date(respostaUnformatted[0].TicketType[0].createdAt).toISOString()),
-          updatedAt: correctData(new Date(respostaUnformatted[0].TicketType[0].updatedAt).toISOString())
-        },
-        createdAt: new Date(respostaUnformatted[0].createdAt).toISOString(),
-        updatedAt: new Date(respostaUnformatted[0].updatedAt).toISOString()
-      }
-
-    return respostaFormatted
+    return formatTicket(respostaUnformatted)
 }
 
 async function postTicketService(userId: number, ticketTypeId: number) {
-    let checkForEnrollment = await ticketRepository.checkEnrollment(userId)
+    let checkForEnrollment: Enrollment = await ticketRepository.checkEnrollment(userId)
     if (!checkForEnrollment) {
         throw notFoundError();
     }
 
-    return "resposta 3"
-}
+    await ticketRepository.createTicket(ticketTypeId, checkForEnrollment.id) //criação
 
+    let respostaUnformatted = await ticketRepository.readTicketsFromUser(userId) as userTickets[]
+    return formatTicket(respostaUnformatted)
+}
 
 export const ticketService = {
     getTicketsFromUser,
