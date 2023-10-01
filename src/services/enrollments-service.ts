@@ -1,12 +1,9 @@
 import { Address, Enrollment } from '@prisma/client';
 import { request } from '@/utils/request';
-import { enrollmentNotFoundError, invalidCepError, notFoundError } from '@/errors';
+import { enrollmentNotFoundError, invalidCepError } from '@/errors';
 import { addressRepository, CreateAddressParams, enrollmentRepository, CreateEnrollmentParams } from '@/repositories';
 import { exclude } from '@/utils/prisma-utils';
 import { AddressEnrollment } from '@/protocols';
-
-type GetOneWithAddressByUserIdResult = Omit<Enrollment, 'userId' | 'createdAt' | 'updatedAt'>;
-type GetAddressResult = Omit<Address, 'createdAt' | 'updatedAt' | 'enrollmentId'>;
 
 async function getAddressFromCEP(cep: string): Promise<AddressEnrollment> {
   const result = await request.get(`${process.env.VIA_CEP_API}/${cep}/json/`);
@@ -41,11 +38,15 @@ async function getOneWithAddressByUserId(userId: number): Promise<GetOneWithAddr
   };
 }
 
+type GetOneWithAddressByUserIdResult = Omit<Enrollment, 'userId' | 'createdAt' | 'updatedAt'>;
+
 function getFirstAddress(firstAddress: Address): GetAddressResult {
   if (!firstAddress) return null;
 
   return exclude(firstAddress, 'createdAt', 'updatedAt', 'enrollmentId');
 }
+
+type GetAddressResult = Omit<Address, 'createdAt' | 'updatedAt' | 'enrollmentId'>;
 
 async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollmentWithAddress) {
   const enrollment = exclude(params, 'address');
