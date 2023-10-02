@@ -69,7 +69,7 @@ describe("Get /hotels", () => {
             expect(response.status).toEqual(httpStatus.NOT_FOUND);
         });
 
-        it('should respond with status 404 when ticket doesnt have a hotel', async () => {
+        it('should respond with status 402 when ticket doesnt have a hotel', async () => {
             const user = await createUser();
             const token = await generateValidToken(user);
             const enrollment = await createEnrollmentWithAddress(user);
@@ -78,7 +78,7 @@ describe("Get /hotels", () => {
 
             const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
 
-            expect(response.status).toEqual(httpStatus.NOT_FOUND);
+            expect(response.status).toEqual(402);
         });
 
         it('should respond with status 402 when ticket is unpaid', async () => {
@@ -150,7 +150,7 @@ describe("Get /hotels/:hotelId", () => {
             expect(response.status).toEqual(httpStatus.NOT_FOUND);
         });
 
-        it('should respond with status 404 when ticket doesnt have a hotel', async () => {
+        it('should respond with status 402 when ticket doesnt have a hotel', async () => {
             const user = await createUser();
             const token = await generateValidToken(user);
             const enrollment = await createEnrollmentWithAddress(user);
@@ -159,7 +159,7 @@ describe("Get /hotels/:hotelId", () => {
 
             const response = await server.get('/hotels/1').set('Authorization', `Bearer ${token}`);
 
-            expect(response.status).toEqual(httpStatus.NOT_FOUND);
+            expect(response.status).toEqual(402);
         });
 
         it('should respond with status 402 when ticket is unpaid', async () => {
