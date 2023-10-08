@@ -45,9 +45,9 @@ async function getBooking(userId: number) {
 }
 
 async function postBooking(userId: number, roomId: number) {
-    validateUserBooking(userId);
+    await validateUserBooking(userId);
 
-    validateRoom(roomId);
+    await validateRoom(roomId);
 
     let createdBooking = await bookingRepository.createBooking(userId, roomId)
 
@@ -63,7 +63,7 @@ async function updateBooking(userId: number, roomId: number, bookingId: number) 
     let bookingPrev = await bookingRepository.findBooking(userId) 
     if(!bookingPrev ) { throw unauthorizedBookingError() }
     
-    validateRoom(roomId);
+    await validateRoom(roomId);
 
     let update = await bookingRepository.updateBooking(bookingId, roomId)
 
