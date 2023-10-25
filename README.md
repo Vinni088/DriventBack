@@ -1,6 +1,7 @@
 # Driven.t - Back-end
 
 - Back-end para Driven.t, uma solução de gerenciamento de eventos.
+  
 -> Esta é uma aplicação "legado", onde parte do código foi recebido no começo do projeto para que fosse atualizado e/ou que novas funcionalidades sejam implementadas
     
 - Back-end for Driven.t, an event management solution.
